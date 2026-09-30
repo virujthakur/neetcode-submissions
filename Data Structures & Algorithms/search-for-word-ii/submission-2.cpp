@@ -1,0 +1,67 @@
+class Solution {
+public:
+    class TrieNode{
+        public:
+        TrieNode* child[26];
+        bool isWord;
+
+    };
+    class Trie{
+        public:
+        TrieNode* root = new TrieNode();
+        void insert(string& word){
+            TrieNode* cur = root;
+            for(char c: word){
+                // cout<<c<<endl;
+                if(cur->child[c-'a'] == nullptr){
+                    cur->child[c-'a'] = new TrieNode();
+                }
+                cur = cur->child[c-'a'];
+            }
+            cur->isWord = true;
+        }
+    };
+    vector<string> ans;
+    vector<vector<int>> directions ={{0,1}, {1,0}, {0,-1}, {-1,0}};
+    void dfs(vector<vector<char>>& board, int i, int j, TrieNode* root, string word){
+        int m= board.size();
+        int n= board[0].size();
+        if(root == nullptr) return;
+
+        if(root->isWord == true){
+            ans.push_back(word);
+            root->isWord = false;
+        }
+
+        char old = board[i][j];
+        board[i][j] = '.';
+        for(vector<int> d: directions){
+            int newi = i+ d[0];
+            int newj = j+ d[1];
+            if(newi >=0 and newj >=0 and newi < m and newj < n and board[newi][newj]!='.'){
+                string newWord = word;
+                newWord.push_back(board[newi][newj]);
+                dfs(board, newi, newj, root->child[board[newi][newj]-'a'], newWord);
+            }
+        }
+        board[i][j] = old;
+    }
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        Trie t;
+        int m = board.size();
+        int n= board[0].size();
+        for(string word: words){
+            t.insert(word);
+        }
+        for(int i=0; i<m; i++){
+            for(int j=0; j<n; j++){
+                string word;
+                word.push_back(board[i][j]);
+                dfs(board, i,j, t.root->child[board[i][j]-'a'], word);
+            }
+        }
+
+        return ans;
+
+    }
+};
